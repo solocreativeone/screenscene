@@ -1,0 +1,11 @@
+name: screenscene
+version: "0.1.0"
+manifest_version: 2
+api_version: 1
+description: "Narrated explainer video generator using screenshots, narration, and animation"
+license: MIT
+provides_tools:
+  - screenscene_render
+provides_hooks: []
+capabilities: []
+requires_hermes: ">=0.20.5"

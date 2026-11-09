@@ -1,0 +1,48 @@
+# Agent directory
+.agent/
+
+# Python bytecode and compiled files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Python environment and caches
+.venv/
+venv/
+.cache/
+*.cache
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Media files
+*.mp4
+*.mov
+*.avi
+*.webm
+*.mkv
+*.mp3
+*.wav
+*.aac
+*.ogg
+*.m4a
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Media output directories
+media/
+renders/
+output/
+temp/
+tmp/
+
+# Secrets and environment configurations
+.env
+.env.*
+!.env.example
