@@ -1,8 +1,8 @@
 name: screenscene
-version: "0.1.0"
+version: "0.1.1"
 manifest_version: 2
 api_version: 1
-description: "Narrated explainer video generator using screenshots, narration, and animation"
+description: "Narrated explainer video generator using screenshots, narration, and animation. Disclosure — executes manim and ffmpeg CLI subprocesses to render animations and mux media; writes temporary audio, cache frames, and MP4 renders to disk."
 license: MIT
 provides_tools:
   - screenscene_render
