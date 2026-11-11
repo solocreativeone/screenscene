@@ -1,11 +1,16 @@
 name: screenscene
-version: "0.1.1"
+version: "0.2.0"
 manifest_version: 2
 api_version: 1
-description: "Narrated explainer video generator using screenshots, narration, and animation. Disclosure — executes manim and ffmpeg CLI subprocesses to render animations and mux media; writes temporary audio, cache frames, and MP4 renders to disk."
+description: "Narrated explainer video generator using screenshots, narration, and animation. Disclosure: calls the ElevenLabs API over HTTPS and sends the narration text; runs manim and ffmpeg as subprocesses; writes temporary files and the final MP4 to ~/screenscene_output."
 license: MIT
 provides_tools:
   - screenscene_render
 provides_hooks: []
 capabilities: []
 requires_hermes: ">=0.20.5"
+requires_env:
+  - name: ELEVENLABS_API_KEY
+    description: "ElevenLabs API key (needs Text to Speech access)"
+    url: "https://elevenlabs.io/app/settings/api-keys"
+    secret: true
