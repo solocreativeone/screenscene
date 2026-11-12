@@ -1,45 +1,59 @@
 # ScreenScene
 
-ScreenScene is a Hermes Agent plugin that is being built to generate narrated explainer videos from UI screenshots and structured narration beats. It will animate focus regions with Manim, synthesize voiceover with ElevenLabs, and combine the result into an MP4 video with ffmpeg.
+ScreenScene is a Hermes Agent plugin that turns a screenshot and a short list of narration beats into a narrated explainer video. For each beat it zooms the camera to a region of your screenshot, highlights it with an outline or a spotlight, and plays an ElevenLabs voiceover. Every camera move is sized to the length of its spoken beat, so the visuals and the voice stay in step.
 
-> **Status: early release (v0.1.x).** The `screenscene_render` tool is registered but is a placeholder that returns "not implemented yet". Rendering, narration and muxing arrive in v0.2.0. The behaviors listed under Disclosures describe the planned implementation and are not active in this version.
+## How it works
 
-## Overview
+1. Hermes looks at the screenshot and chooses 3 to 6 beats. Each beat has a short narration and a focus region.
+2. The plugin sends each beat's text to ElevenLabs and measures the length of the returned audio.
+3. Manim renders a camera path over your real screenshot, with each move timed to its beat.
+4. ffmpeg combines the video and the narration into one MP4.
 
-ScreenScene provides one tool, `screenscene_render`. Given a screenshot and a sequence of beats (narration text plus a focus region of the image), the finished plugin will render a synchronized video. The narration audio acts as the master clock: each animation is sized to the measured length of its spoken beat.
+## Tool
 
-## Tools
+`screenscene_render`
 
-* `screenscene_render`: Renders an explainer video from a screenshot and narration beats. Placeholder in v0.1.x.
+| Parameter | Required | Description |
+|---|---|---|
+| `image_path` | yes | Path to a PNG or JPG screenshot |
+| `beats` | yes | 1 to 8 beats. Each has `narration` (up to 500 characters) and an optional `region` as `[x0, y0, x1, y1]`, fractions of the image from the top left. Use `[0, 0, 1, 1]` for a whole-image beat. Optional per beat: `highlight` (`box`, `spotlight` or `none`) and `color` (hex such as `#2EC4B6`). Colours rotate automatically if not given |
+| `voice_id` | no | An ElevenLabs voice your account can use. Default is a premade voice |
+| `quality` | no | `standard` (720p30, default), `high` (1080p30, sharper small text, slower) or `draft` (480p15, fastest) |
 
-## Requirements (planned for v0.2.0)
+It returns the path of the finished video, its length in seconds, and the number of beats. Videos are saved in `~/screenscene_output/`.
 
-* Manim Community Edition (`manim`) installed and on your PATH
-* `ffmpeg` installed and on your PATH
-* An ElevenLabs API key, supplied through Hermes's configured secret handling
+Example prompt: "Use screenscene_render on ~/shots/dashboard.png. Make 4 beats: an overview, then three zooms on the most important areas. Keep each narration short."
 
-None of these are used by v0.1.x.
+## Requirements
+
+* Manim Community Edition (`manim`) on your PATH, or set `SCREENSCENE_MANIM` to its full path
+* `ffmpeg` and `ffprobe` on your PATH (or set `SCREENSCENE_FFMPEG` and `SCREENSCENE_FFPROBE`)
+* An ElevenLabs API key with Text to Speech access, stored as `ELEVENLABS_API_KEY`. Free accounts can use their own premade voices but not library voices through the API
+
+## Limitations
+
+* Choosing regions needs a model that can look at images. If your model cannot, give the regions yourself in the prompt.
+* A four beat video takes about one minute to render at the default quality. `high` is slower.
+* Small text is only readable if the camera zooms in. Use tight regions around specific content, since full-width bands barely zoom.
+* Region accuracy depends on how well the model locates parts of the image. Highlight boxes are only as precise as the coordinates provided.
+* Narration uses ElevenLabs credits, about one call per beat.
 
 ## Disclosures
 
-In accordance with Hermes plugin catalog requirements, the following behaviors are disclosed. They describe the planned implementation and take effect only when the renderer ships.
-
-* Network calls: Will make outbound HTTPS requests to the ElevenLabs API for text-to-speech. The narration script text is sent to ElevenLabs, using the user's own API key.
-* Subprocesses: Will run `manim` CLI commands to render animations and `ffmpeg` CLI commands to combine video and audio.
-* Files written: Will write temporary voiceover audio, intermediate render files, and the final MP4 to disk.
-* Background processes: None. Rendering runs as a bounded, synchronous step during tool execution.
-* Current behavior (v0.1.x): No network calls, no subprocesses and no files are written.
+* Network calls: HTTPS requests to the ElevenLabs API (`api.elevenlabs.io`) for text to speech. The narration text of each beat is sent. The API key is read through Hermes secret handling and is never written to files or logs by this plugin.
+* Subprocesses: runs `manim`, `ffmpeg` and `ffprobe` with fixed argument lists and timeouts. No shell is used. Child processes receive a minimal environment (`PATH`, `HOME`, `LANG` and a private `TMPDIR`) and do not inherit Hermes provider keys.
+* Files: reads the screenshot path you give it. Writes temporary files to a private temp folder (deleted after each run) and the final MP4 to `~/screenscene_output/`.
+* Background processes: none. Rendering runs as a bounded step during the tool call.
+* Telemetry: none.
 
 ## Installation
-
-Until the plugin is listed in the Hermes catalog, install it from its repository:
 
 ```bash
 hermes plugins install solocreativeone/screenscene
 hermes plugins enable screenscene
 ```
 
-To check a local copy:
+Then make sure `ELEVENLABS_API_KEY` is set for Hermes. To check a local copy:
 
 ```bash
 hermes plugins doctor .

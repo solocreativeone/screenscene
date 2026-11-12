@@ -1,5 +1,5 @@
 name: screenscene
-version: "0.2.0"
+version: "0.2.1"
 manifest_version: 2
 api_version: 1
 description: "Narrated explainer video generator using screenshots, narration, and animation. Disclosure: calls the ElevenLabs API over HTTPS and sends the narration text; runs manim and ffmpeg as subprocesses; writes temporary files and the final MP4 to ~/screenscene_output."
